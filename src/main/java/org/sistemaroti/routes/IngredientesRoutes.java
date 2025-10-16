@@ -25,5 +25,14 @@ public class IngredientesRoutes {
             res.type("application/json");
             return mapper.writeValueAsString(creado);
         });
+        //Actualiza Cliente
+        put("/ingredientes/actualizar", (req, res) -> {
+            Ingrediente ingActualizado = mapper.readValue(req.body(), Ingrediente.class);
+            Ingrediente status= ingredienteService.actualizarIngrediente(ingActualizado);
+            res.type("application/json");
+            return mapper.writeValueAsString(status);
+        });
+
+
     }
 }

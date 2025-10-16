@@ -92,20 +92,20 @@ public class IngredienteDAO {
     }
 
 
-    public boolean actualizarCliente(Cliente c) {
-        String sql = "UPDATE clientes SET nombre = ?, mail = ?, telefono = ?, direccion = ? WHERE id = ?";
+    public boolean actualizarIngrediente(Ingrediente i) {
+        String sql = "UPDATE ingredientes SET nombre = ?, marca = ?, precio = ? WHERE id = ?";
         boolean actualizado = false;
 
         try (PreparedStatement ps = Conexion.getConnection().prepareStatement(sql)) {
-            ps.setString(1, c.getNombre());
-            ps.setString(2, c.getMail());
-            ps.setString(3, c.getTelefono());
-            ps.setString(4, c.getDireccion());
-            ps.setInt(5, c.getId());  // ID del cliente a actualizar
+            ps.setString(1, i.getNombre());
+            ps.setString(2, i.getMarca());
+            ps.setDouble(3, i.getPrecio());
+            ps.setInt(4, i.getId());  // ID del cliente a actualizar
 
             int filas = ps.executeUpdate();
             actualizado = (filas > 0);
-            System.out.println("Cliente actualizado correctamente.");
+            if (actualizado) System.out.println("Ingrediente actualizado correctamente.");
+
         } catch (SQLException e) {
             e.printStackTrace();
         }

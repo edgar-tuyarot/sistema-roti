@@ -17,4 +17,11 @@ public class IngredienteService {
 
     }
 
+    public Ingrediente actualizarIngrediente(Ingrediente i){
+        if(dao.actualizarIngrediente(i)){
+            return i;
+        }
+        return dao.buscarIngrediente(i.getNombre(),i.getMarca());
+    }
+
 }
