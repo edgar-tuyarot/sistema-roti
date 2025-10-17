@@ -3,6 +3,7 @@ package org.sistemaroti;
 import org.sistemaroti.db.Conexion;
 import org.sistemaroti.routes.ClientesRoutes;
 import org.sistemaroti.routes.IngredientesRoutes;
+import org.sistemaroti.routes.ProductoIngredienteRoutes;
 import org.sistemaroti.routes.ProductosRoutes;
 
 import static spark.Spark.port;
@@ -14,6 +15,7 @@ public class Main {
         ClientesRoutes.init();
         ProductosRoutes.init();
         IngredientesRoutes.init();
+        ProductoIngredienteRoutes.init();
 
 
     }

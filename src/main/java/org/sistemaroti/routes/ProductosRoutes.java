@@ -2,6 +2,7 @@ package org.sistemaroti.routes;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.sistemaroti.model.Cliente;
+import org.sistemaroti.model.Producto;
 import org.sistemaroti.service.ClienteService;
 import org.sistemaroti.service.ProductoService;
 
@@ -16,10 +17,13 @@ public class ProductosRoutes {
         path("/productos", () -> {
             //Get Todos
             get("", (req, res) -> mapper.writeValueAsString(productoService.listarProductos()));
-
-
-
-
+        });
+        //Crear producto
+        post("/producto/crear", (req, res) -> {
+            Producto nuevo = mapper.readValue(req.body(), Producto.class);
+            Producto creado = productoService.crearProducto(nuevo);
+            res.type("application/json");
+            return mapper.writeValueAsString(creado);
         });
     }
 }
