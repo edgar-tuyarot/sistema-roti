@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.sistemaroti.db.Conexion;
+import org.sistemaroti.dto.PedidoClienteDTO;
 import org.sistemaroti.model.Cliente;
 
 public class ClienteDAO {
@@ -153,6 +154,8 @@ public class ClienteDAO {
 
         return actualizado;
     }
+
+
 
 
 }

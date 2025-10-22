@@ -1,9 +1,7 @@
 package org.sistemaroti.routes;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.sistemaroti.model.Cliente;
 import org.sistemaroti.model.Producto;
-import org.sistemaroti.service.ClienteService;
 import org.sistemaroti.service.ProductoService;
 
 import static spark.Spark.*;

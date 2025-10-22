@@ -1,10 +1,7 @@
 package org.sistemaroti.dao;
 
 import org.sistemaroti.db.Conexion;
-import org.sistemaroti.model.Ingrediente;
-import org.sistemaroti.model.Producto;
 import org.sistemaroti.model.ProductoIngrediente;
-
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -50,4 +47,31 @@ public class ProductoIngredienteDAO {
 
             return "Ingrediente agregado";
         }
+
+    public ProductoIngrediente modificarPi(ProductoIngrediente pi) {
+        String sql = "UPDATE ingredientes_productos SET producto_id = ?, ingrediente_id = ?, cantidad = ? WHERE id = ?";
+        boolean actualizado = false;
+
+        try (PreparedStatement ps = Conexion.getConnection().prepareStatement(sql)) {
+            ps.setInt(1, pi.getProducto_id());
+            ps.setInt(2, pi.getIngrediente_id());
+            ps.setDouble(3, pi.getCantidad());
+            ps.setInt(5, pi.getId());  // ID del cliente a actualizar
+
+            int filas = ps.executeUpdate();
+            actualizado = (filas > 0);
+
+            System.out.println("Cliente actualizado correctamente.");
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+
+        return pi;
+    }
+
+
 }
+
+
+
