@@ -17,5 +17,6 @@ public class PedidoClienteDTO {
     private String direccion;
     private String telefono;
     private double monto;
+    private String fechaFormateada;
     
 }

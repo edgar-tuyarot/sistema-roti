@@ -1,18 +1,53 @@
 package org.sistemaroti.dao;
 
 import java.sql.*;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.sistemaroti.db.Conexion;
+import org.sistemaroti.dto.Direccion;
 import org.sistemaroti.dto.PedidoClienteDTO;
 import org.sistemaroti.model.Cliente;
 
 public class ClienteDAO {
 
+
+    public List<Direccion> buscarDirecciones(int id){
+        List<Direccion> direcciones = new ArrayList<>();
+
+        String sql = "SELECT id, cliente_id,direccion  FROM direcciones_cliente WHERE eliminado = 0 AND cliente_id = "+id;
+
+        try (Connection conn = Conexion.getConnection();
+             Statement st = conn.createStatement();
+             ResultSet rs = st.executeQuery(sql)) {
+
+
+            while (rs.next()) {
+                Direccion dir = new Direccion();
+                dir.setId(rs.getInt("id"));
+                dir.setId_cliente(rs.getInt("cliente_id"));
+                dir.setDireccion(rs.getString("direccion"));
+
+                direcciones.add(dir);
+                System.out.println(dir);
+            }
+
+
+
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return direcciones;
+
+    }
+
     public  List<Cliente> buscarTodos() {
         List<Cliente> arrayClientes = new ArrayList<>();
-        String sql = "SELECT id, nombre, mail, telefono,direccion FROM clientes WHERE eliminado = 0";
+        String sql = "SELECT id, nombre, mail, telefono FROM clientes WHERE eliminado = 0";
 
         try (Connection conn = Conexion.getConnection();
              Statement st = conn.createStatement();
@@ -24,7 +59,7 @@ public class ClienteDAO {
                 c.setNombre(rs.getString("nombre"));
                 c.setTelefono(rs.getString("telefono"));
                 c.setMail(rs.getString("mail"));
-                c.setDireccion(rs.getString("direccion"));
+                c.setDirecciones(buscarDirecciones(rs.getInt("id")));
                 arrayClientes.add(c);
             }
         } catch (SQLException e) {
@@ -37,7 +72,7 @@ public class ClienteDAO {
     public  Cliente buscarCliente(int id) {
         Cliente c = new Cliente();
 
-        String sql = "SELECT id, nombre, mail,telefono,direccion FROM clientes WHERE id = "+id+" AND eliminado = 0";
+        String sql = "SELECT id, nombre, mail,telefono FROM clientes WHERE id = "+id+" AND eliminado = 0";
 
         try (Connection conn = Conexion.getConnection();
             Statement st = conn.createStatement();
@@ -47,8 +82,7 @@ public class ClienteDAO {
             c.setNombre(rs.getString("nombre"));
             c.setTelefono(rs.getString("telefono"));
             c.setMail(rs.getString("mail"));
-            c.setDireccion(rs.getString("direccion"));
-
+            c.setDirecciones(buscarDirecciones(c.getId()));
 
         } catch (SQLException e) {
             e.printStackTrace();
@@ -56,10 +90,11 @@ public class ClienteDAO {
 
         return c;
     }
+
     public  Cliente buscarClienteMail(String mail) {
         Cliente c = new Cliente();
 
-        String sql = "SELECT id, nombre, mail,telefono,direccion FROM clientes WHERE mail = '"+mail+"' AND eliminado = 0";
+        String sql = "SELECT id, nombre, mail,telefono FROM clientes WHERE mail = '"+mail+"' AND eliminado = 0";
 
         try (Connection conn = Conexion.getConnection();
              Statement st = conn.createStatement();
@@ -69,7 +104,6 @@ public class ClienteDAO {
             c.setNombre(rs.getString("nombre"));
             c.setTelefono(rs.getString("telefono"));
             c.setMail(rs.getString("mail"));
-            c.setDireccion(rs.getString("direccion"));
 
 
         } catch (SQLException e) {
@@ -79,8 +113,10 @@ public class ClienteDAO {
         return c;
     }
 
+    //Crear cliente
     public Cliente crearCliente(Cliente c){
         Cliente newC = c;
+        boolean completo = false;
 
         Cliente clienteExistente = buscarClienteMail(c.getMail());
 
@@ -89,42 +125,53 @@ public class ClienteDAO {
             return clienteExistente;
         }else{
 
-        String sql = "INSERT INTO clientes (nombre, mail, telefono, direccion) VALUES (?, ?, ?, ?)";
+        String sql = "INSERT INTO clientes (nombre, mail, telefono) VALUES (?, ?, ?)";
 
         try (PreparedStatement ps = Conexion.getConnection().prepareStatement(sql,Statement.RETURN_GENERATED_KEYS)) {
             ps.setString(1, newC.getNombre());
             ps.setString(2, newC.getMail());
             ps.setString(3, newC.getTelefono());
-            ps.setString(4, newC.getDireccion());
             ps.executeUpdate();
             System.out.println("Cliente insertado correctamente.");
+
 
             // Obtener el ID generado
             try (ResultSet rs = ps.getGeneratedKeys()) {
                 if (rs.next()) {
                     c.setId(rs.getInt(1));
                     System.out.println(c);
+
+                    if (c.getId()>0){
+                       completo = agregarDireccion(c.getId(),c.getDireccion_inicial());
+                    }
                 }
+
             }
+
+
 
         } catch (SQLException e) {
             e.printStackTrace();
         }
 
-        return c;
+        if (completo){
+            return c;
+        }else{
+            return null;
+        }
+
         }
     }
 
 
     public boolean actualizarCliente(Cliente c) {
-        String sql = "UPDATE clientes SET nombre = ?, mail = ?, telefono = ?, direccion = ? WHERE id = ?";
+        String sql = "UPDATE clientes SET nombre = ?, mail = ?, telefono = ? WHERE id = ?";
         boolean actualizado = false;
 
         try (PreparedStatement ps = Conexion.getConnection().prepareStatement(sql)) {
             ps.setString(1, c.getNombre());
             ps.setString(2, c.getMail());
             ps.setString(3, c.getTelefono());
-            ps.setString(4, c.getDireccion());
             ps.setInt(5, c.getId());  // ID del cliente a actualizar
 
             int filas = ps.executeUpdate();
@@ -137,9 +184,6 @@ public class ClienteDAO {
 
         return actualizado;
     }
-
-
-
 
     public boolean borrar(int id) {
         String sql = "UPDATE clientes SET eliminado = 1 WHERE id = ?";
@@ -158,6 +202,26 @@ public class ClienteDAO {
         return actualizado;
     }
 
+    public boolean agregarDireccion (int id, String direccion){
+
+        String sql = "INSERT INTO direcciones_cliente (cliente_id, direccion) VALUES (?,?)";
+        try (PreparedStatement ps = Conexion.getConnection().prepareStatement(sql,Statement.RETURN_GENERATED_KEYS)) {
+            ps.setInt(1, id);
+            ps.setString(2, direccion);
+            ps.executeUpdate();
+            return true;
+
+
+
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+
+
+
+    }
 
 
 

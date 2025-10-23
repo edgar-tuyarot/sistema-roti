@@ -1,6 +1,8 @@
 package org.sistemaroti.dao;
 
 import java.sql.*;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -43,7 +45,7 @@ public class PedidoDAO {
 
 
 
-    //Rertorna lista de id /  nombre / cantidad  / monto de cada producto de un pedido
+    //Rertorna lista de {id,nombre,cantidad,monto} de cada producto de un pedido
     public List<ProductosPedidoDTO> buscarProductosPedido(int id) {
         List<ProductosPedidoDTO> arrayProductosPedido = new ArrayList<>();
 
@@ -79,7 +81,7 @@ public class PedidoDAO {
         return arrayProductosPedido;
     }
 
-    //Buscar Pedido por id
+    //Buscar Pedido por id retorna una instancia de pedido cliente.
     public PedidoClienteDTO buscarPedido(int id) {
         PedidoClienteDTO pedidoClienteDTO = new PedidoClienteDTO();
         String sql = "SELECT\n" +
@@ -100,6 +102,8 @@ public class PedidoDAO {
              Statement st = conn.createStatement();
              ResultSet rs = st.executeQuery(sql)) {
             rs.next();
+
+
             pedidoClienteDTO.setId(rs.getInt("id"));
             pedidoClienteDTO.setNombre(rs.getString("nombre"));
             pedidoClienteDTO.setTelefono(rs.getString("cliente_telefono"));
@@ -107,6 +111,12 @@ public class PedidoDAO {
             pedidoClienteDTO.setDireccion(rs.getString("direccion"));
             pedidoClienteDTO.setEstado(rs.getString("estado"));
             pedidoClienteDTO.setMonto(rs.getDouble("total_pedido"));
+
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm:ss");
+            Timestamp timestamp = pedidoClienteDTO.getFecha();
+            LocalDateTime fechaLocal = timestamp.toLocalDateTime();
+            String fechaFormateada = fechaLocal.format(formatter);
+            pedidoClienteDTO.setFechaFormateada(fechaFormateada);
 
         } catch (SQLException e) {
             e.printStackTrace();

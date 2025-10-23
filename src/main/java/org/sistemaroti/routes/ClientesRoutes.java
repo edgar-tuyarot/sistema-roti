@@ -14,8 +14,13 @@ public class ClientesRoutes {
             //Get Todos
             get("", (req, res) -> mapper.writeValueAsString(clientes.listarUsuarios()));
 
-            //Get uno
-            get("/:id", (req, res) -> mapper.writeValueAsString(clientes.buscarCliente(Integer.parseInt(req.params(":id")))));
+            //Get cliente
+            get("/ver/:id", (req, res) -> {
+                res.type("application/json");
+                int id = Integer.parseInt(req.params("id"));
+                return mapper.writeValueAsString(clientes.buscarCliente(id));
+            });
+
 
             //Crear cliente
             post("/crear", (req, res) -> {
