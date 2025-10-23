@@ -138,6 +138,9 @@ public class ClienteDAO {
         return actualizado;
     }
 
+
+
+
     public boolean borrar(int id) {
         String sql = "UPDATE clientes SET eliminado = 1 WHERE id = ?";
         boolean actualizado = false;

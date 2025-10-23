@@ -3,6 +3,7 @@ package org.sistemaroti.service;
 import org.sistemaroti.dao.PedidoDAO;
 import org.sistemaroti.dao.ProductoDAO;
 import org.sistemaroti.dto.PedidoDTO;
+import org.sistemaroti.model.Cliente;
 import org.sistemaroti.model.Pedido;
 import org.sistemaroti.model.PedidoDetalles;
 
@@ -34,6 +35,10 @@ public class PedidoService {
         return dao.quitarProductoDelPedido(idProducto);
     }
 
+    public PedidoDTO cambiarEstado(Pedido p){
+
+        return buscarPedido(dao.cambiarEstado(p).getId());
+    }
 
 
 }

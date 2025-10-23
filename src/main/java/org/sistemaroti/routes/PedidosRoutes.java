@@ -1,6 +1,7 @@
 package org.sistemaroti.routes;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.sistemaroti.dto.PedidoDTO;
 import org.sistemaroti.model.Pedido;
 import org.sistemaroti.model.PedidoDetalles;
 import org.sistemaroti.service.PedidoService;
@@ -37,6 +38,15 @@ public class PedidosRoutes {
             res.type("application/json");
             return mapper.writeValueAsString(creado);
         });
+
+        //Cambiar estado
+        put("/pedidos/cambiar-estado", (req, res) -> {
+            Pedido nuevo = mapper.readValue(req.body(), Pedido.class);
+            PedidoDTO creado = pedidoService.cambiarEstado(nuevo);
+            res.type("application/json");
+            return mapper.writeValueAsString(creado);
+        });
+
 
         //Borrar elemento del pedido
         delete("pedidos/quitar-producto/:id", (req, res) -> {

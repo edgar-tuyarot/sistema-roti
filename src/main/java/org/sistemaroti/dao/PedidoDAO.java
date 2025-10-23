@@ -6,9 +6,7 @@ import java.util.List;
 
 import org.sistemaroti.db.Conexion;
 import org.sistemaroti.dto.PedidoClienteDTO;
-import org.sistemaroti.dto.PedidoDTO;
 import org.sistemaroti.dto.ProductosPedidoDTO;
-import org.sistemaroti.model.Cliente;
 import org.sistemaroti.model.Pedido;
 import org.sistemaroti.model.PedidoDetalles;
 
@@ -17,11 +15,11 @@ public class PedidoDAO {
     //Crear Pedido
     public Pedido crearPedido(Pedido p){
 
-            String sql = "INSERT INTO pedidos (cliente_id, total, estado_id) VALUES (?, ?, ?)";
+            String sql = "INSERT INTO pedidos (cliente_id, direccion, estado_id) VALUES (?, ?, ?)";
 
             try (PreparedStatement ps = Conexion.getConnection().prepareStatement(sql,Statement.RETURN_GENERATED_KEYS)) {
                 ps.setInt(1, p.getCliente_id());
-                ps.setDouble(2, p.getTotal());
+                ps.setString(2,p.getDireccion());
                 ps.setInt(3, p.getEstado_id());
 
                 ps.executeUpdate();
@@ -59,7 +57,6 @@ public class PedidoDAO {
                 "JOIN detalles_pedido dp ON p.id = dp.pedido_id\n" +
                 "JOIN productos pr ON dp.producto_id = pr.id\n" +
                 "JOIN estado_pedido ep on p.estado_id = ep.id\n" +
-                "JOIN direcciones_pedido dirp on dirp.pedido_id = p.id\n" +
                 "WHERE p.id = "+id+";";
 
         try (Connection conn = Conexion.getConnection();
@@ -90,16 +87,15 @@ public class PedidoDAO {
                 "    c.nombre,\n" +
                 "    p.fecha_creacion AS fecha,\n" +
                 "    ep.nombre AS estado,\n" +
-                "    dirp.direccion AS direccion,\n" +
+                "    p.direccion AS direccion,\n" +
                 "    c.telefono AS cliente_telefono,\n" +
                 "    SUM(dp.monto) AS total_pedido\n" +
                 "FROM pedidos p\n" +
                 "JOIN clientes c ON c.id = p.cliente_id\n" +
                 "JOIN estado_pedido ep ON p.estado_id = ep.id\n" +
-                "JOIN direcciones_pedido dirp ON c.id = dirp.cliente_id\n" +
                 "LEFT JOIN detalles_pedido dp ON p.id = dp.pedido_id\n" +
-                "where p.id = "+id+" GROUP BY p.id, c.nombre, p.fecha_creacion, ep.nombre, dirp.direccion, c.telefono;";
-
+                "WHERE p.id = " + id + " \n" +
+                "GROUP BY p.id, c.nombre, p.fecha_creacion, ep.nombre, p.direccion, c.telefono;";
         try (Connection conn = Conexion.getConnection();
              Statement st = conn.createStatement();
              ResultSet rs = st.executeQuery(sql)) {
@@ -169,26 +165,23 @@ public class PedidoDAO {
         return actualizado;
     }
 
-    public boolean actualizarCliente(Cliente c) {
-        String sql = "UPDATE clientes SET nombre = ?, mail = ?, telefono = ?, direccion = ? WHERE id = ?";
-        boolean actualizado = false;
+
+
+    public Pedido cambiarEstado(Pedido p) {
+        String sql = "UPDATE pedidos SET estado_id = ? WHERE id = ?";
+
 
         try (PreparedStatement ps = Conexion.getConnection().prepareStatement(sql)) {
-            ps.setString(1, c.getNombre());
-            ps.setString(2, c.getMail());
-            ps.setString(3, c.getTelefono());
-            ps.setString(4, c.getDireccion());
-            ps.setInt(5, c.getId());  // ID del cliente a actualizar
-
+            ps.setInt(1,p.getEstado_id());
+            ps.setInt(2, p.getId());
             int filas = ps.executeUpdate();
-            actualizado = (filas > 0);
-            System.out.println("Cliente actualizado correctamente.");
+
         } catch (SQLException e) {
             e.printStackTrace();
         }
 
 
-        return actualizado;
+        return p;
     }
 
     public boolean borrar(int id) {
@@ -207,6 +200,5 @@ public class PedidoDAO {
 
         return actualizado;
     }
-
 
 }
